@@ -1,0 +1,79 @@
+{
+  "schema": "local3d.img2threejs.chatgpt-pilot.v1",
+  "date": "2026-10-27",
+  "status": "EXPERIMENTAL_CODE_ONLY_NOT_DEPLOYED",
+  "upstream": {
+    "repo": "https://github.com/img2threejs/img2threejs",
+    "commit": "3e7099e1b7fe93e187e06db4bdbe1e1906c21a28",
+    "license": "Apache-2.0",
+    "checkout": "isolated shallow pinned clone; no automatic installs"
+  },
+  "source": {
+    "repo": "velvet-workspace/local-3d-generator",
+    "fixture": "benchmarks/g3/fixtures/06-thin-chair/input.png",
+    "source_class": "PROJECT_ORIGINAL_PROCEDURAL",
+    "reference_sha256": "bba81747e772317941ec7141ba3ca50edd45cf77f4370ce32d3756fb798eed47",
+    "ground_truth_glb_is_NOT_an_AI_output": true
+  },
+  "existing_capabilities": {
+    "LOCAL3D_G1": "ready/G1_DEMO; Three.js browser preview already exists",
+    "LOCAL3D_G2": "TripoSR installed but inactive under G1",
+    "LOCAL3D_G3": "existing geometry and silhouette QA; no duplicate engine or print QA added",
+    "CreativeCraft": "headless typed router exists but rejected procedural Three.js request with BLOCKED/no_intent_match",
+    "ChatGPT": "connected Remote Desktop Commander executed all isolated tests on Chris from this conversation",
+    "Claude": "not used"
+  },
+  "trial": {
+    "input_admission": "PASS",
+    "initial_auto_scaffold": "STRICT_QUALITY_BLOCKED; 15+ missing/incomplete quality fields",
+    "manual_spec_authoring": "ChatGPT visually authored and refined geometry spec in isolated run; not automatic image-to-mesh inference",
+    "pbr_extract": "Three material crop extractions PASS with confidence 0.86 per extractor; confidence is NOT render likeness or physical PBR accuracy",
+    "strict_quality": "PASS; 0 errors and 0 warnings after authoring",
+    "material_trial_bad": "Initial PBR maps tiled across flat synthetic faces; rejected after actual Chrome screenshot review",
+    "material_trial_repair": "Used upstream evidence-bearing textureless material contract; no upstream source edits",
+    "compiled_runtime": "Node 24 stripTypeScriptTypes into .mjs, existing Three.js 0.180 and Playwright-core 1.64, Chrome on Chris",
+    "chrome_render": "PASS; front, rear and three-quarter views captured; manual visual review recognizes chair",
+    "rendered_meshes": 7,
+    "vertices": 7098,
+    "triangles": 12096,
+    "component_names": [
+      "root",
+      "backrest",
+      "leg-front-left",
+      "leg-front-right",
+      "leg-rear-left",
+      "leg-rear-right",
+      "front-lip"
+    ],
+    "objective_view_fidelity": "NOT MEASURED / UNPROVEN",
+    "dimensional_fidelity": "UNKNOWN; synthetic source units, not mm",
+    "print_suitability": "UNPROVEN; no STL/3MF or slicer",
+    "physical_actions": false,
+    "cloud_calls": false,
+    "gpu_inference": false,
+    "printer_calls": false
+  },
+  "typed_adapter_tests": {
+    "doctor": "PASS; pinned upstream hash checked",
+    "validate": "PASS; strict-quality gate in subprocess",
+    "generate": "PASS; new .ts output and SHA-linked receipt",
+    "duplicate_output": "BLOCKED / WOULD_OVERWRITE",
+    "workspace_escape": "BLOCKED / OUTSIDE_WORKSPACE",
+    "unit_tests": "4 PASS, 0 FAIL",
+    "limitations": [
+      "Not one-click autonomous image-to-code: ChatGPT must author and visually review a detailed spec",
+      "No automatic ChatGPT Workspace skill import, CreativeCraft route registration or live G1 modification",
+      "No claim that a procedural Three.js model is watertight or print ready",
+      "Not deployed; proposed experimental PR should remain draft until accepted routing and regression checks"
+    ]
+  },
+  "next_gate": {
+    "decision": "OPTIONAL_BROWSER_PROP_ONLY",
+    "before_production": [
+      "Use canonical CreativeCraft typed capability and authority before any default route change",
+      "Add repeatable visual fidelity benchmark with actual input screenshot",
+      "Preserve print/fabrication and source-provenance boundaries",
+      "Verify ChatGPT Workspace skill activation separately from direct Desktop Commander access"
+    ]
+  }
+}
