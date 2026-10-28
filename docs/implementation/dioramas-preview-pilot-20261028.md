@@ -65,6 +65,7 @@ If an optimizer validation fails, it does not produce an output. The source GLB 
 - Geometry-only preview: **5,563,396 bytes**, just **0.05% smaller**. Both GLBs loaded with all PBR textures preserved **byte-for-byte**; browser mean RGB difference **0/255** on Chrome 155. The real product-like textured model surfaced why a geometry-only optimizer has little value when textures are already optimized.
 - The optional CLI now **refuses** derivatives saving less than 1% by default instead of producing near-duplicates; the test above was performed on a local derivative created before that new quality gate. The existing G1 fixture still compresses 69.79%.
 - Actual screenshots: [source](../evidence/dioramas-textured-watch-20261028/source.png), [preview](../evidence/dioramas-textured-watch-20261028/preview.png).
+- Mac-Bedroom / Edge 143 also **PASS** on this same watch and derivative (identical source and optimized SHA, three WebP textures, mean RGB difference **0/255**); verified 2026-10-28. The Mac temp directory was the same non-symlink `TMPDIR` noted above.
 - Repeatable smoke for any independently licensed/approved self-contained GLB: `node tools/preview-optimizer/qa-textured.mjs <source.glb> <existing.preview.glb>`, with no source upload or production output mutation. A real Velvet Factory customer's model remains **unverified** until expressly sourced.
 
 ### CSP security validation
