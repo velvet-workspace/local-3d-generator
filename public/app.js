@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from '/vendor/three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from '/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from '/vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
+import { createStudioPreview } from './studio-preview.js';
 
 const el = id => document.getElementById(id);
 const state = { mode: 'image', provider: 'fixture-demo', providers: [], image: null, imageUrl: null, jobs: [], selected: null, currentModel: null, lastModelUrl: null, viewer: null, geometryCache: new Map(), geometryPending: new Set(), benchmarkCache: new Map(), benchmarkPending: new Set(), benchmarkCatalog: new Set() };
@@ -41,6 +43,9 @@ function initViewer() {
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     host.appendChild(renderer.domElement);
+    const studio = createStudioPreview(renderer, scene);
+    const studioButton = el('studioMode');
+    studioButton.disabled = true;
     scene.add(new THREE.HemisphereLight(0xc5f7ed, 0x25384b, 2.6));
     const key = new THREE.DirectionalLight(0xffffff, 3.3); key.position.set(-2, 5, 3); scene.add(key);
     const fill = new THREE.DirectionalLight(0x7ae7e0, 1.4); fill.position.set(3, 1, -2); scene.add(fill);
@@ -49,6 +54,20 @@ function initViewer() {
     controls.enablePan = false; controls.minDistance = 1.2; controls.maxDistance = 12;
     controls.target.set(0, .05, 0);
     const render = () => renderer.render(scene, camera);
+    studioButton.addEventListener('click', () => {
+      try {
+        const enabled = studio.setEnabled(studioButton.getAttribute('aria-pressed') !== 'true');
+        studioButton.setAttribute('aria-pressed', String(enabled));
+        studioButton.textContent = enabled ? 'סטודיו ✓' : 'סטודיו';
+        render();
+      } catch {
+        studio.setEnabled(false);
+        studioButton.setAttribute('aria-pressed', 'false');
+        studioButton.textContent = 'סטודיו';
+        toast('תאורת סטודיו אינה זמינה במכשיר זה; התצוגה הרגילה נשמרה.');
+        render();
+      }
+    });
     controls.addEventListener('change', render);
     function resize() {
       const width = Math.max(1, host.clientWidth), height = Math.max(1, host.clientHeight);
@@ -69,9 +88,11 @@ function initViewer() {
       state.currentModel = null; render();
     }
     const loader = new GLTFLoader();
+    loader.setMeshoptDecoder(MeshoptDecoder);
     function show(url, real = false) {
       if (url === state.lastModelUrl) return;
       state.lastModelUrl = url;
+      studioButton.disabled = true;
       disposeModel();
       if (!url) return;
       loader.load(url, gltf => {
@@ -83,6 +104,7 @@ function initViewer() {
         const size = box.getSize(new THREE.Vector3());
         obj.scale.multiplyScalar(2.15 / Math.max(size.x,size.y,size.z, .001));
         scene.add(obj); state.currentModel = obj;
+        studioButton.disabled = false;
         el('emptyState').hidden = true;
         el('demoWatermark').hidden = false;
         el('demoWatermark').textContent = real ? 'REAL LOCAL AI · DRAFT / NOT PRINT QUALIFIED' : 'DEMO FIXTURE · NOT AI GENERATED';
