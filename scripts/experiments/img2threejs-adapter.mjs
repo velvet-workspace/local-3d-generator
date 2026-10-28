@@ -50,6 +50,8 @@ export function pinnedCheckout(input) {
   for(const rel of Object.values(SRC)) if(!fs.existsSync(path.join(dir,rel))) throw fail('UPSTREAM_MISSING','Missing required upstream file: '+rel);
   const check=run('git',['rev-parse','HEAD'],{cwd:dir});
   if(check.status!==0||check.stdout!==PINNED_UPSTREAM) throw fail('UPSTREAM_MISMATCH','Refusing unpinned/upgraded upstream checkout');
+  const dirty=run('git',['status','--porcelain','--untracked-files=no'],{cwd:dir});
+  if(dirty.status!==0||dirty.stdout) throw fail('UPSTREAM_DIRTY','Refusing an upstream checkout with modified tracked files');
   return dir;
 }
 function validated(spec,upstream) {
