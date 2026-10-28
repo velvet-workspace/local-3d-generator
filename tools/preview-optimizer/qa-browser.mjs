@@ -19,7 +19,9 @@ const outputPath = path.join(dir,'original.preview.glb');
 await fs.writeFile(sourcePath,createFixtureBuffer());
 const meta = await optimizeApprovedPreview(sourcePath,outputPath);
 const optimized = await fs.readFile(outputPath);
-const browserExecutable = process.env.LOCAL3D_QA_BROWSER || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const browserExecutable = process.env.LOCAL3D_QA_BROWSER || (process.platform === 'win32' ?
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' :
+  process.platform === 'darwin' ? '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge' : '/usr/bin/chromium');
 let app, browser;
 const errors = [];
 try {

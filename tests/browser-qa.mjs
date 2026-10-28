@@ -36,6 +36,9 @@ try {
   page.on('request',req=>{const u=req.url(); if(!u.startsWith(base+'/') && !u.startsWith('data:') && !u.startsWith('blob:')) requests.push(u);});
   const result = await page.goto(base, { waitUntil:'networkidle' });
   assert.equal(result.status(),200);
+  const csp = result.headers()['content-security-policy'] || '';
+  assert.ok(csp.includes("'wasm-unsafe-eval'"), 'Only WebAssembly compilation is allowed for Meshopt decoder');
+  assert.equal(csp.includes("'unsafe-eval'"), false, 'JavaScript eval must remain forbidden');
   await page.locator('#healthStatus').getByText('READY').waitFor({timeout:6000});
   await page.waitForFunction(()=>document.querySelector('#benchmarkProgress')?.textContent?.includes('1 / 9'),null,{timeout:8000});
   assert.equal(await page.locator('#benchmarkProgress').getAttribute('dir'),'ltr','Benchmark fractions must not be reordered by Hebrew RTL');
