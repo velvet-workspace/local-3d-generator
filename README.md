@@ -8,6 +8,12 @@ A standalone, Hebrew RTL workbench for experimenting with local 3D model generat
 - **G2 manual image-to-3D:** a locally tested TripoSR adapter on the configured Windows host. It runs only in a separately started, explicitly confirmed GPU session and produces a draft GLB.
 - **G3 quality research:** CPU-based model diagnostics, asset-integrity checks and evidence-backed tests. These checks do not certify that a generated object is printable.
 
+## Optional 3D studio and browser-preview pilot
+
+The existing GLB viewer has an opt-in **Studio** light toggle for product previews. It does not alter downloaded model bytes. Separately, `tools/preview-optimizer` can create smaller `*.preview.glb` derivatives for browser display; original GLBs remain authoritative and **only original, separately qualified geometry may be evaluated for print**. This optimizer is never called by the server or its job queue.
+
+See [Dioramas preview pilot](docs/implementation/dioramas-preview-pilot-20261028.md) for the separately locked installation, commands, license, exact test results and limitations. This is not deployed into a global ChatGPT Skill or production infrastructure.
+
 ## Run the G1 demo
 
 Requires Node.js 20+.

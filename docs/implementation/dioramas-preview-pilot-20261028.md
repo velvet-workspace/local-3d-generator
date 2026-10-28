@@ -41,6 +41,13 @@ If an optimizer validation fails, it does not produce an output. The source GLB 
 - Pixel similarity on the fixture: mean absolute RGB difference **0.016 / 255** across an 803 x 483 capture. This is a limited fixture-specific comparison, not a blanket visual-fidelity certification.
 - Viewport evidence: [original](../evidence/dioramas-preview-20261028/original.png), [optimized](../evidence/dioramas-preview-20261028/optimized.png), [optimized + Studio](../evidence/dioramas-preview-20261028/optimized-studio.png).
 
+## Cross-platform verification
+
+- Mac-Bedroom / Node.js 24.21.0 / Microsoft Edge 143.0.3650.80: `npm run qa:browser` **PASS** (9 phases), `npm test --prefix tools/preview-optimizer` **PASS**, `node tools/preview-optimizer/qa-browser.mjs` **PASS**.
+- The same deterministic fixture compressed to 36,248 bytes on Mac; mean absolute RGB deviation in the browser was **0.015/255**.
+- On macOS the default Node `os.tmpdir()` path starts with `/var`, a filesystem symlink; the existing G3.45/G3.47 security checks reject such directory ancestors. Cross-platform QA was correctly rerun with `TMPDIR=$HOME/Library/Caches/vf-dioramas-testtmp-20261028` (a real non-symlink directory) without relaxing the security check.
+- Mac screenshot output remains local to the isolated pilot checkout. The linked repository screenshots are from the Windows run. Neither run establishes real-product fidelity or a browser FPS baseline.
+
 ## Scope and gating
 
 - No optimized GLB replaces a G1/G2 output or any 3MF/STL. Tests intercept a browser response **only inside a headless Playwright smoke**.

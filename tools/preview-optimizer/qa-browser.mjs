@@ -85,7 +85,7 @@ try {
   await optimizedPage.locator('#viewport').screenshot({path:path.join(evidence,'optimized-studio.png')});
   assert.deepEqual(errors,[],'Browser parse/rasterization errors');
   console.log('OPTIMIZED_GLB_BROWSER_PASS '+JSON.stringify({
-    chrome:browser.version(),optimizedAssetIntercepted:intercepted,sourceBytes:meta.sourceBytes,
+    browserVersion:browser.version(),browserExecutable,optimizedAssetIntercepted:intercepted,sourceBytes:meta.sourceBytes,
     previewBytes:meta.previewBytes,pixelComparison,sourceCanvasSha256:hash(originalPixels),
     previewCanvasSha256:hash(optimizedPixels),studioCanvasSha256:hash(studioPixels),screenshots:evidence,
     sourceUntouched:true
