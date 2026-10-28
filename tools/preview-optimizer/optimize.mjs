@@ -81,8 +81,9 @@ export async function optimizeApprovedPreview(inputPath, outputPath) {
   if (JSON.stringify(before) !== JSON.stringify(after)) {
     throw new Error('Preview optimization changed structural mesh/triangle counts');
   }
-  if (optimized.length >= source.length) {
-    throw new Error('No size benefit; refusing to create a larger derivative');
+  // Creating a separate derivative is not worthwhile for already-optimized textured GLBs.
+  if (optimized.length > source.length * 0.99) {
+    throw new Error('No meaningful preview size benefit (under 1%); no derivative written');
   }
   if (digest(await fs.readFile(input)) !== sourceSha256) {
     throw new Error('Source GLB changed during optimization');

@@ -577,7 +577,7 @@ export async function createApp(options = {}) {
       res.setHeader('X-Frame-Options', 'DENY');
       res.setHeader('Referrer-Policy', 'no-referrer');
       res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
-      res.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self' 'sha256-" + IMPORT_HASH + "' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+      res.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self' 'sha256-" + IMPORT_HASH + "' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self' blob:; worker-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
       const host = String(req.headers.host || '');
       if (!/^(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(host)) fail('HOST_DENIED', 403, 'Loopback host required');
       const requested = new URL(req.url, 'http://localhost');

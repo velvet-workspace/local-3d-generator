@@ -20,6 +20,9 @@ try {
   assert.equal(result.previewSha256, sha(optimized));
   assert.equal(sha(await fs.readFile(sourcePath)), sha(source));
   assert.ok(optimized.length < source.length);
+  // A second pass on an already-compressed file must not proliferate near-identical artifacts.
+  await assert.rejects(optimizeApprovedPreview(outputPath, path.join(dir,'double.preview.glb')),
+    /No meaningful preview size benefit/);
   assert.deepEqual(result.shape, { meshes:4, scenes:1, primitives:4, triangles:6144 });
   await assert.rejects(optimizeApprovedPreview(sourcePath, outputPath), /EEXIST/);
   await assert.rejects(optimizeApprovedPreview(sourcePath, sourcePath), /different.*preview/);
