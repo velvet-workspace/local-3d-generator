@@ -36,6 +36,26 @@ try {
   page.on('request',req=>{const u=req.url(); if(!u.startsWith(base+'/') && !u.startsWith('data:') && !u.startsWith('blob:')) requests.push(u);});
   const result = await page.goto(base, { waitUntil:'networkidle' });
   assert.equal(result.status(),200);
+  const csp = result.headers()['content-security-policy'] || '';
+  assert.ok(csp.includes("'wasm-unsafe-eval'"), 'Only WebAssembly compilation is allowed for Meshopt decoder');
+  assert.equal(csp.includes("'unsafe-eval'"), false, 'JavaScript eval must remain forbidden');
+  assert.ok(csp.includes("connect-src 'self' blob:"), 'Embedded GLB PBR textures require local blob fetching');
+  assert.ok(!csp.includes('https:'), 'No blanket external HTTPS access from viewer CSP');
+  // Execute the probe inside an actual same-origin module script; Playwright page.evaluate
+  // is a DevTools execution context and does NOT enforce webpage CSP restrictions.
+  const securityPage = await browser.newPage();
+  await securityPage.route('**/app.js', async route => {
+    const js = await fs.readFile(path.join(root,'public','app.js'),'utf8');
+    const suffix = "\nwindow.__cspProbe = [eval, Function].map((ctor, i) => { " +
+      "try {if (i === 0) ctor('2+2'); else new ctor('return 2+2')(); return 'ALLOWED';} " +
+      "catch (e) {return e.name;} });\n";
+    await route.fulfill({status:200,contentType:'text/javascript',body:js+suffix});
+  });
+  await securityPage.goto(base, {waitUntil:'load'});
+  await securityPage.waitForFunction(() => Array.isArray(window.__cspProbe),null,{timeout:8000});
+  const evalGates = await securityPage.evaluate(() => window.__cspProbe);
+  assert.deepEqual(evalGates, ['EvalError','EvalError'], 'CSP must still forbid dynamic JavaScript compilation');
+  await securityPage.close();
   await page.locator('#healthStatus').getByText('READY').waitFor({timeout:6000});
   await page.waitForFunction(()=>document.querySelector('#benchmarkProgress')?.textContent?.includes('1 / 9'),null,{timeout:8000});
   assert.equal(await page.locator('#benchmarkProgress').getAttribute('dir'),'ltr','Benchmark fractions must not be reordered by Hebrew RTL');
@@ -75,6 +95,22 @@ try {
   const desktopComplete = path.join(output,'02-completed-desktop.png');
   await page.screenshot({path:desktopComplete,fullPage:true});
   pushPhase('Text fixture job, GLB viewport, DRAFT report, no AI');
+  // Dioramas-inspired studio preview is opt-in, local-only and never changes GLB bytes.
+  const studioMode = page.locator('#studioMode');
+  assert.equal(await studioMode.getAttribute('aria-pressed'), 'false');
+  assert.equal(await studioMode.isEnabled(), true);
+  const normalPixels = await page.locator('#canvasHost canvas').screenshot();
+  await studioMode.click();
+  assert.equal(await studioMode.getAttribute('aria-pressed'), 'true');
+  assert.notEqual(hash(normalPixels), hash(await page.locator('#canvasHost canvas').screenshot()),
+    'Studio lighting must visibly change rendered pixels');
+  await page.screenshot({path:path.join(output,'02b-studio-preview.png'),fullPage:true});
+  await studioMode.click();
+  assert.equal(await studioMode.getAttribute('aria-pressed'), 'false');
+  const unchangedGlb = await page.request.get(base+glbHref);
+  assert.equal(hash(await unchangedGlb.body()), hash(await modelDownload.body()),
+    'Preview mode must never modify the source/downloaded GLB');
+  pushPhase('Opt-in studio light visibly changes pixels, restores baseline and preserves GLB SHA');
   // Confirm actual 3D orbit changes the rendered page, not just an HTML element.
   const viewport = page.locator('#viewport');
   const rect = await viewport.boundingBox();
