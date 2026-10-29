@@ -28,6 +28,63 @@ def num(x):
     return round(float(x), 7)
 
 
+
+def summarize_material_channels(gltf):
+    """Report declared glTF PBR image bindings, not decoded texture quality.
+
+    Diagnostic concept compared with Apache-2.0 AssetFurnace GLB forensics:
+    https://github.com/Bingeljell/image-to-3dlab/tree/98b3c4cb16266df52ec22dd6052774f1ede99b82
+    This bounded original implementation makes no materials or print claim.
+    """
+    materials=gltf.get("materials", [])
+    if not isinstance(materials,list) or len(materials)>256:
+        raise QAError("Invalid glTF material list")
+    keys=("baseColor","metallicRoughness","normal","occlusion","emissive")
+    channels=[]
+    for idx,material in enumerate(materials):
+        if not isinstance(material,dict):
+            raise QAError("Invalid glTF material entry")
+        pbr=material.get("pbrMetallicRoughness",{})
+        if not isinstance(pbr,dict):
+            raise QAError("Invalid glTF PBR declaration")
+        sources=(pbr.get("baseColorTexture"),pbr.get("metallicRoughnessTexture"),
+                 material.get("normalTexture"),material.get("occlusionTexture"),
+                 material.get("emissiveTexture"))
+        bits={key:isinstance(entry,dict) and type(entry.get("index")) is int
+              and entry["index"]>=0 for key,entry in zip(keys,sources)}
+        channels.append({"index":idx,**bits})
+    return {
+        "measurement":"DECLARED_GLTF_PBR_TEXTURE_BINDINGS_NOT_IMAGE_PIXELS",
+        "materialCount":len(channels),
+        "declaredChannelCount":sum(sum(x[k] for k in keys) for x in channels),
+        "materials":channels,
+        "textureImageReadback":"NOT_TESTED",
+        "printQualified":False
+    }
+
+
+def inspect_material_channels(file: Path):
+    """Bounded read-only GLB JSON chunk inspection; existing 64 MiB budget applies."""
+    with file.open("rb") as stream:
+        stream.seek(12)
+        chunk_header=stream.read(8)
+        if len(chunk_header)!=8 or chunk_header[4:]!=b"JSON":
+            raise QAError("GLB missing JSON first chunk")
+        length=int.from_bytes(chunk_header[:4],"little")
+        if length<2 or length>min(MAX_BYTES,file.stat().st_size-20):
+            raise QAError("GLB JSON exceeds declared bounds")
+        raw=stream.read(length)
+    if len(raw)!=length:
+        raise QAError("Incomplete GLB JSON chunk")
+    try:
+        gltf=json.loads(raw)
+    except (UnicodeError,ValueError) as exc:
+        raise QAError("GLB JSON parse rejected") from exc
+    if not isinstance(gltf,dict):
+        raise QAError("Invalid GLB JSON root")
+    return summarize_material_channels(gltf)
+
+
 def inspect_mesh(mesh):
     import numpy as np
     v = np.asarray(mesh.vertices, dtype=np.float64)
@@ -137,6 +194,7 @@ def inspect_glb(file: Path) -> dict:
             "extents": [num(b-a) for a,b in zip(bounds_min,bounds_max)]
         },
         "parts": parts, "topology": topology,
+        "visualMaterialChannels": inspect_material_channels(file),
         "notEvaluated": {
             "realWorldScaleAndUnits": "UNKNOWN_UNCALIBRATED",
             "selfIntersections": "NOT_TESTED", "wallThickness": "NOT_TESTED",
