@@ -569,7 +569,8 @@ export async function createApp(options = {}) {
     ['/vendor/three/examples/jsm/controls/OrbitControls.js', [path.join(ROOT, 'node_modules', 'three', 'examples', 'jsm', 'controls', 'OrbitControls.js'), 'text/javascript; charset=utf-8']],
     ['/vendor/three/examples/jsm/loaders/GLTFLoader.js', [path.join(ROOT, 'node_modules', 'three', 'examples', 'jsm', 'loaders', 'GLTFLoader.js'), 'text/javascript; charset=utf-8']],
     ['/vendor/three/examples/jsm/libs/meshopt_decoder.module.js', [path.join(ROOT, 'node_modules', 'three', 'examples', 'jsm', 'libs', 'meshopt_decoder.module.js'), 'text/javascript; charset=utf-8']],
-    ['/vendor/three/examples/jsm/utils/BufferGeometryUtils.js', [path.join(ROOT, 'node_modules', 'three', 'examples', 'jsm', 'utils', 'BufferGeometryUtils.js'), 'text/javascript; charset=utf-8']]
+    ['/vendor/three/examples/jsm/utils/BufferGeometryUtils.js', [path.join(ROOT, 'node_modules', 'three', 'examples', 'jsm', 'utils', 'BufferGeometryUtils.js'), 'text/javascript; charset=utf-8']],
+    ['/vendor/three/examples/jsm/utils/SkeletonUtils.js', [path.join(ROOT, 'node_modules', 'three', 'examples', 'jsm', 'utils', 'SkeletonUtils.js'), 'text/javascript; charset=utf-8']]
   ]);
   const server = http.createServer(async (req, res) => {
     try {

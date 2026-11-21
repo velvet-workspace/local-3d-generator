@@ -25,7 +25,11 @@ async function waitFor(id, wanted, timeout = 1800) {
   throw new Error('Timeout waiting for job ' + id + ' to become ' + wanted);
 }
 beforeEach(async () => {
-  tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'local3d-test-'));
+  // macOS /var is commonly an alias of /private/var. The HTTP security
+  // gate rejects symlinked ancestors, so this fixture must use a canonical
+  // temp root rather than weakening the production path check.
+  const canonicalTemp = await fs.realpath(os.tmpdir());
+  tmp = await fs.mkdtemp(path.join(canonicalTemp, 'local3d-test-'));
   app = await createApp({ dataDir: path.join(tmp, 'data'), fixtureFile: path.join(tmp, 'fixture.glb'), stepMs: 32 });
   await listenFixtureSafePort(app.server);
   base = 'http://127.0.0.1:' + app.server.address().port;
