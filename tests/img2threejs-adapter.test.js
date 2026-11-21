@@ -15,7 +15,9 @@ test('typed doctor input is accepted, unknown operations are blocked',()=>{
   assert.throws(()=>parseArgs(['doctor','--upstream','a','--upstream','b']),{code:'DUPLICATE_ARGUMENT'});
 });
 test('all output/input path references must stay under an explicit workspace',()=>{
- const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'vf-img2-'));
+ // macOS /var is a symlink to /private/var: test the same canonical root
+ // used by inside(), without weakening its fail-closed ancestor check.
+ const tmp=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'vf-img2-')));
  try {
    assert.equal(inside(tmp,path.join(tmp,'nested','spec.json')),path.join(tmp,'nested','spec.json'));
    assert.throws(()=>inside(tmp,path.resolve(tmp,'..','outside.json')),{code:'OUTSIDE_WORKSPACE'});
